@@ -18,7 +18,7 @@ You need Python 3.9+ and a bot token from the Discord Developer Portal. Make sur
 Bot permissions needed: Manage Messages, Ban Members, Moderate Members, Send Messages, Read Message History.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/SpamGuard.git
+git clone https://github.com/DavidHuynh01/SpamGuard.git
 cd SpamGuard
 pip install -r requirements.txt
 ```
