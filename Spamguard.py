@@ -13,6 +13,9 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
 MUTE_DURATION = timedelta(hours=24)
 DEFAULT_PURGE_DURATION = timedelta(hours=2)
 
+ADMIN_COOLDOWN_RATE = 5
+ADMIN_COOLDOWN_PER = 10.0
+
 PURGE_CHOICES = [
     app_commands.Choice(name="1 hour", value=1),
     app_commands.Choice(name="2 hours", value=2),
@@ -94,6 +97,7 @@ async def on_ready():
 @app_commands.describe(channel="The channel to lock down", action="What to do when someone posts (default: Mute + Purge)")
 @app_commands.choices(action=ACTION_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def setup(interaction: discord.Interaction, channel: discord.TextChannel, action: app_commands.Choice[str] = None):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -123,6 +127,7 @@ async def setup(interaction: discord.Interaction, channel: discord.TextChannel, 
 @bot.tree.command(name="remove", description="Remove a channel from SpamGuard")
 @app_commands.describe(channel="The channel to stop watching")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def remove(interaction: discord.Interaction, channel: discord.TextChannel):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -144,6 +149,7 @@ async def remove(interaction: discord.Interaction, channel: discord.TextChannel)
 
 @bot.tree.command(name="channels", description="List all channels watched by SpamGuard")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def channels(interaction: discord.Interaction):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -162,6 +168,7 @@ async def channels(interaction: discord.Interaction):
 @app_commands.describe(user="The user whose messages to delete", duration="How far back to delete messages")
 @app_commands.choices(duration=PURGE_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def purge(interaction: discord.Interaction, user: discord.Member, duration: app_commands.Choice[int]):
     await interaction.response.defer(ephemeral=True)
     purge_after = discord.utils.utcnow() - timedelta(hours=duration.value)
@@ -200,6 +207,7 @@ async def purge(interaction: discord.Interaction, user: discord.Member, duration
 @app_commands.describe(duration="How far back to auto-delete messages")
 @app_commands.choices(duration=PURGE_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def setpurge(interaction: discord.Interaction, duration: app_commands.Choice[int]):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -217,6 +225,7 @@ async def setpurge(interaction: discord.Interaction, duration: app_commands.Choi
 @app_commands.describe(action="The action to take")
 @app_commands.choices(action=ACTION_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def setaction(interaction: discord.Interaction, action: app_commands.Choice[str]):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -234,6 +243,7 @@ async def setaction(interaction: discord.Interaction, action: app_commands.Choic
 @app_commands.describe(action="Which action to set the message for", message="Custom message ({server} will be replaced with the server name)")
 @app_commands.choices(action=ACTION_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def setmessage(interaction: discord.Interaction, action: app_commands.Choice[str], message: str):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -252,6 +262,7 @@ async def setmessage(interaction: discord.Interaction, action: app_commands.Choi
 
 @bot.tree.command(name="viewmessage", description="View the current DM messages for each SpamGuard action")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def viewmessage(interaction: discord.Interaction):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -269,6 +280,7 @@ async def viewmessage(interaction: discord.Interaction):
 @app_commands.describe(action="Which action to reset the message for")
 @app_commands.choices(action=ACTION_CHOICES)
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def resetmessage(interaction: discord.Interaction, action: app_commands.Choice[str]):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -286,6 +298,7 @@ async def resetmessage(interaction: discord.Interaction, action: app_commands.Ch
 @bot.tree.command(name="setlog", description="Set the channel where SpamGuard logs actions")
 @app_commands.describe(channel="The channel to send logs to")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def setlog(interaction: discord.Interaction, channel: discord.TextChannel):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -308,6 +321,7 @@ logger_group = app_commands.Group(name="logger", description="Enable or disable 
 
 @logger_group.command(name="enable", description="Enable SpamGuard action logging")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def logger_enable(interaction: discord.Interaction):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -330,6 +344,7 @@ async def logger_enable(interaction: discord.Interaction):
 
 @logger_group.command(name="disable", description="Disable SpamGuard action logging")
 @app_commands.checks.has_permissions(administrator=True)
+@app_commands.checks.cooldown(ADMIN_COOLDOWN_RATE, ADMIN_COOLDOWN_PER)
 async def logger_disable(interaction: discord.Interaction):
     config = load_config()
     guild_id = str(interaction.guild.id)
@@ -361,6 +376,11 @@ bot.tree.add_command(logger_group)
 async def command_error(interaction: discord.Interaction, error):
     if isinstance(error, app_commands.MissingPermissions):
         await interaction.response.send_message("You need Administrator permissions to use this command.", ephemeral=True)
+    elif isinstance(error, app_commands.CommandOnCooldown):
+        await interaction.response.send_message(
+            f"You're using SpamGuard commands too fast. Try again in **{error.retry_after:.1f}s**.",
+            ephemeral=True
+        )
 
 
 @bot.event
